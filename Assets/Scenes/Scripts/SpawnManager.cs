@@ -7,25 +7,34 @@ public class SpawnManager : MonoBehaviour
     public GameObject enemyPrefab;
     public GameObject powerupPrefab;
     private float spawnRange = 9f;
+    public int enemyCount;
+    public int waveNumber = 1;
 
     // Start is called before the first frame update
     void Start()
-    {
-        Instantiate(enemyPrefab, GenerateSpawnPosition(), enemyPrefab.transform.rotation);
+    {        
+        SpawnEnemyWave(waveNumber);
         StartCoroutine(PowerupSpawnRoutine());
     }
 
     // Update is called once per frame
     void Update()
     {
-        
+        enemyCount = FindObjectsOfType<Enemy>().Length;
+
+        if(enemyCount == 0)
+        {
+            waveNumber++;
+            SpawnEnemyWave(waveNumber);
+            StartCoroutine(PowerupSpawnRoutine());
+        }
     }
 
     IEnumerator PowerupSpawnRoutine()
     {
         float  seconds = GenerateSpawnTime();
         yield return new WaitForSeconds(seconds);
-        SpawnPowerup();
+        Instantiate(powerupPrefab, GenerateSpawnPosition(), powerupPrefab.transform.rotation);
     }
 
     private Vector3 GenerateSpawnPosition()
@@ -45,17 +54,11 @@ public class SpawnManager : MonoBehaviour
         return timeToSpawn;
     }
 
-    private void SpawnPowerup()
+    void SpawnEnemyWave(int enemiesToSpawn)
     {
-        while(GameObject.FindGameObjectWithTag("Powerup") == null)
+        for(int i = 0; i < enemiesToSpawn; i++)
         {
-            bool powerupOnPlayer = GameObject.Find("Player").GetComponent<PlayerController>().hasPowerup;
-            Debug.Log("Has PowerUp: "+ powerupOnPlayer);
-            if(powerupOnPlayer == false)
-            {
-                Instantiate(powerupPrefab, GenerateSpawnPosition(), powerupPrefab.transform.rotation);
-            }            
+            Instantiate(enemyPrefab, GenerateSpawnPosition(), enemyPrefab.transform.rotation);
         }
-        StartCoroutine(PowerupSpawnRoutine());
     }
 }
